@@ -84,7 +84,7 @@ Balboa32U4ButtonA buttonA;
 void BalanceRocky()
 {
 
-    // **************Enter the control parameters here
+  // **************Enter the control parameters here
     
   float Kp = 1.5165*(10**3);
   float Ki = 7.0582*(10**3);
@@ -119,8 +119,8 @@ void BalanceRocky()
   // right to left. This helps ensure that the Left and Right motors are balanced
 
   // *** enter equations for input signals for v_c (left and right) in terms of the variables available ****
-    v_c_R = v_d - (Jp*measured_speedL+Ji*distLeft_m + ci*dist_accum);
-    v_c_L = v_d - (Jp*measured_speedR+Ji*distRight_m + ci*dist_accum);
+    v_c_R = v_d - (Jp*measured_speedR+Ji*distLeft_m + ci*dist_accum);
+    v_c_L = v_d - (Jp*measured_speedL+Ji*distRight_m + ci*dist_accum);
 
 
 
