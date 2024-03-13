@@ -9,11 +9,14 @@
 //
 // The balancing algorithm is implemented in BalanceRocky()
 // which you should modify to get the balancing to work
+//
+
 
 #include <Balboa32U4.h>
 #include <Wire.h>
 #include <LSM6.h>
 #include "Balance.h"
+
 
 extern int32_t angle_accum;
 extern int32_t speedLeft;
@@ -28,6 +31,7 @@ int16_t limitCount = 0;
 uint32_t cur_time = 0;  
 float distLeft_m;       
 float distRight_m;       
+
 
 extern uint32_t delta_ms;
 float measured_speedL = 0;
@@ -55,13 +59,20 @@ uint32_t prev_time;
  
 #define G_RATIO (162.5)
 
+
+
 LSM6 imu;
 Balboa32U4Motors motors;
 Balboa32U4Encoders encoders;
 Balboa32U4Buzzer buzzer;
 Balboa32U4ButtonA buttonA;
 
+
 #define FIXED_ANGLE_CORRECTION (0.26)  // ***** Replace the value 0.25 with the value you obtained from the Gyro calibration procedure
+
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // This is the main function that performs the balancing
@@ -72,15 +83,21 @@ Balboa32U4ButtonA buttonA;
 
 void BalanceRocky()
 {
+
   // **************Enter the control parameters here
-  float Kp = 5700;
-  float Ki = 27000;
-  float Ci = -4700;   
-  float Jp = 350;
-  float Ji = -4700;
+    
+  float Kp = 3221 ;
+  float Ki = 14994;
+  float Ci =  -2294; //-262.6747;   
+  float Jp = 142.4; //42.0681;
+  float Ji = -2267; //-420.2795;
+
+
+
 
     float v_c_L, v_c_R; // these are the control velocities to be sent to the motors
     float v_d = 0; // this is the desired speed produced by the angle controller
+
 
    // Variables available to you are: 
    // angle_rad  - angle in radians
@@ -93,17 +110,22 @@ void BalanceRocky()
 
    // *** enter an equation for v_d in terms of the variables available ****
     v_d = Kp*angle_rad + Ki*angle_rad_accum; // this is the desired velocity from the angle controller 
+      
 
   // The next two lines implement the feedback controller for the motor. Two separate velocities are calculated. 
+  //
   //
   // We use a trick here by criss-crossing the distance from left to right and 
   // right to left. This helps ensure that the Left and Right motors are balanced
 
   // *** enter equations for input signals for v_c (left and right) in terms of the variables available ****
-    v_c_R = v_d - (Jp*measured_speedR + Ji*distLeft_m + Ci*dist_accum);
-    v_c_L = v_d - (Jp*measured_speedL + Ji*distRight_m + Ci*dist_accum);
-    Serial.println(v_c_L);
-    Serial.println(v_c_R);
+    v_c_R = v_d - (Jp*measured_speedR+Ji*distLeft_m + Ci*dist_accum);
+    v_c_L = v_d - (Jp*measured_speedL+Ji*distRight_m + Ci*dist_accum);
+
+
+
+
+
 
     // save desired speed for debugging
     desSpeedL = v_c_L;
@@ -118,8 +140,11 @@ void BalanceRocky()
    
     // Set the motor speeds
     motors.setSpeeds((int16_t) (v_c_L), (int16_t)(v_c_R));
-  //  motors.setSpeeds((int16_t) (300), (int16_t)(300)); 
+    motors.setSpeeds((int16_t) (v_c_L), (int16_t)(v_c_R));
+
 }
+
+
 
 void setup()
 {
@@ -139,6 +164,8 @@ void setup()
   ledGreen(0);
   ledYellow(0);  
 }
+
+
 
 int16_t time_count = 0;
 extern int16_t angle_prev;
@@ -170,6 +197,8 @@ void UpdateSensors()
     isBalancingStatus = true;
   }
 }
+
+
 
 void GetMotorAndAngleMeasurements()
 {
@@ -203,6 +232,8 @@ void balanceResetAccumulators()
     speed_err_right_acc = 0.0;
 }
 
+
+
 void loop()
 {
   static uint32_t prev_print_time = 0;   // this variable is to control how often we print on the serial monitor
@@ -211,6 +242,7 @@ void loop()
   char enableLongTermGyroCorrection = 1;
   
   cur_time = millis();                   // get the current time in miliseconds
+
 
   if((cur_time - prev_time) > UPDATE_TIME_MS){
     UpdateSensors();                    // run the sensor updates.
@@ -223,6 +255,7 @@ void loop()
     {
       start_counter = 0;
    }
+
   
   if(angle_rad > -0.1 && angle_rad < 0.1 && ! start_flag)   
   {
@@ -238,6 +271,7 @@ void loop()
       ledYellow(1);
     }
   }
+
 
   // every UPDATE_TIME_MS, if the start_flag has been set, do the balancing
   if(start_flag)
@@ -283,4 +317,6 @@ if(cur_time - prev_print_time > 103)   // do the printing every 105 ms. Don't wa
        Serial.println(speedCont);
        prev_print_time = cur_time;
   }
+
+ 
 }
